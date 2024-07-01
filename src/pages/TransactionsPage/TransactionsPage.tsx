@@ -1,12 +1,16 @@
-import React, { FC } from 'react';
-import './TransactionsPage.css';
+import React from 'react';
+import Header from '../../components/Header';
+import TransactionList from '../../components/TransactionList';
 
-interface TransactionsPageProps {}
+const TransactionPage = () => {
+  return (
+    <div className="client-page__container">
+      <Header />
+      <div className="client-page__content">
+        <TransactionList />
+      </div>
+    </div>
+  );
+};
 
-const TransactionsPage: FC<TransactionsPageProps> = () => (
-  <div className="TransactionsPage">
-    TransactionsPage Component
-  </div>
-);
-
-export default TransactionsPage;
+export default TransactionPage;
