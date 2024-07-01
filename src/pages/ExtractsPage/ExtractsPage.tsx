@@ -1,12 +1,16 @@
-import React, { FC } from 'react';
-import './ExtractsPage.css';
+import React from 'react';
+import Header from '../../components/Header';
+import ExtractList from '../../components/ExtractList';
 
-interface ExtractsPageProps {}
+const ExtractPage = () => {
+  return (
+    <div className="client-page__container">
+      <Header />
+      <div className="client-page__content">
+        <ExtractList />
+      </div>
+    </div>
+  );
+};
 
-const ExtractsPage: FC<ExtractsPageProps> = () => (
-  <div className="ExtractsPage">
-    ExtractsPage Component
-  </div>
-);
-
-export default ExtractsPage;
+export default ExtractPage;
