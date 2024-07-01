@@ -32,5 +32,10 @@ const router = createBrowserRouter([
         element: <ExtractsPage/>,
         errorElement: <ErrorPage/>,
     },
+    {
+        path: "/extracts/:clientId",
+        element: <ExtractsPage/>,
+        errorElement: <ErrorPage/>,
+    },
 ]);
 export default router;

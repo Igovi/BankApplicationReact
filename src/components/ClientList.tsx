@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Table, Form, Button, Spinner, Alert } from 'react-bootstrap';
 import { getAllClients, createClient, editClient, deleteClient } from '../services/clientService';
 import { z, ZodError } from 'zod';
+import { useNavigate } from 'react-router-dom';
 import { Client } from '../interfaces/Client';
 
-// Definindo esquema de validação com Zod
+
 const clientSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters long' }),
   email: z.string().email({ message: 'Invalid email address' }),
@@ -24,6 +25,7 @@ const ClientList: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [removingClientId, setRemovingClientId] = useState<number | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     fetchClients();
@@ -84,20 +86,24 @@ const ClientList: React.FC = () => {
   };
 
   const handleDeleteClient = async (id: number) => {
-    setRemovingClientId(id); // Marca o cliente como sendo removido
+    setRemovingClientId(id); 
     try {
       await deleteClient(id);
       setClientList((prev) => prev.filter((client) => client.id !== id));
     } catch (error) {
       console.error('Error deleting client:', error);
     } finally {
-      setRemovingClientId(null); // Finaliza a marcação de remoção
+      setRemovingClientId(null); 
     }
   };
 
   const edit = (client: Client) => {
     setFormData(client);
     setIsEditMode(true);
+  };
+
+  const goToExtractPage = (clientId: number) => {
+    navigate(`/extracts/${clientId}`); 
   };
 
   const clearForm = () => {
@@ -138,6 +144,9 @@ const ClientList: React.FC = () => {
                   <Spinner animation="border" variant="danger" size="sm" />
                 ) : (
                   <>
+                    <Button className="me-2" variant="info" size="sm" onClick={() => goToExtractPage(client.id)}>
+                      Extract
+                    </Button>
                     <Button variant="primary" size="sm" className="me-2" onClick={() => edit(client)}>
                       Edit
                     </Button>

@@ -1,29 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Form, Button } from 'react-bootstrap';
+import { Table, Form, Button , Alert} from 'react-bootstrap';
 import axios from 'axios';
 import { Transaction } from '../interfaces/Transaction';
+import { useParams } from 'react-router-dom';
 
 const ExtractList: React.FC = () => {
+  const { clientId } = useParams<{ clientId?: string }>(); 
   const [transactionList, setTransactionList] = useState<Transaction[]>([]);
   const [total, setTotal] = useState<number>(0);
-  const [formData, setFormData] = useState({ id: 0 });
+  const [formData, setFormData] = useState({ id: clientId ? parseInt(clientId, 10) : 0 }); 
   const [showTransactions, setShowTransactions] = useState(false);
-  
+  const [noTransactionsFound, setNoTransactionsFound] = useState(false);
 
   useEffect(() => {
-    
-  }, []);
+    if (clientId && !showTransactions) {
+      fetchTransactions(clientId);
+    }
+  }, [clientId, showTransactions]);
+
+  const fetchTransactions = async (id: string) => {
+    setNoTransactionsFound(false)
+    try {
+      const response = await axios.get(`/extract/client/${id}`);
+      setTransactionList(response.data.transactions);
+      setTotal(response.data.total);
+      setShowTransactions(true);
+    } catch (error) {
+      setNoTransactionsFound(true)
+    }
+  };
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setNoTransactionsFound(false)
     try {
       const response = await axios.get(`/extract/client/${formData.id}`);
       setTransactionList(response.data.transactions);
       setTotal(response.data.total);
       setShowTransactions(true);
     } catch (error) {
-      console.error(error);
-      alert('Error fetching transactions');
+      setNoTransactionsFound(true)
     }
   };
 
@@ -51,6 +67,12 @@ const ExtractList: React.FC = () => {
           Submit
         </Button>
       </Form>
+
+      {noTransactionsFound && (
+        <Alert variant="warning">
+          No transactions found for the given client ID.
+        </Alert>
+      )}
 
       {showTransactions && (
         <div className="client-list__container">
