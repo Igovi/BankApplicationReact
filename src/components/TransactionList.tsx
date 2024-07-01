@@ -38,7 +38,7 @@ const TransactionList: React.FC = () => {
   };
 
   const handleDeleteTransaction = async (id: number) => {
-    setRemovingTransactionId(id); // Marca a transação como sendo removida
+    setRemovingTransactionId(id); 
     try {
       await deleteTransaction(id);
       setTransactionList((prev) => prev.filter((transaction) => transaction.id !== id));
@@ -47,7 +47,7 @@ const TransactionList: React.FC = () => {
       console.error(error);
       alert('Error deleting transaction');
     } finally {
-      setRemovingTransactionId(null); // Finaliza a marcação de remoção
+      setRemovingTransactionId(null); 
     }
   };
 
@@ -67,7 +67,7 @@ const TransactionList: React.FC = () => {
         amount: z.number().min(0.01, { message: 'Amount must be greater than 0,01' }),
       });
 
-      transactionSchema.parse(transaction); // Validação utilizando Zod
+      transactionSchema.parse(transaction); 
 
       const createdTransaction = await createTransaction(transaction as Transaction);
       setTransactionList((prev) => [...prev, createdTransaction]);

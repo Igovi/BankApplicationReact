@@ -43,7 +43,7 @@ const ClientList: React.FC = () => {
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     
-    // Validar dados do formulário
+    
     try {
       const validatedData = clientSchema.parse(formData);
       

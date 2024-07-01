@@ -9,7 +9,7 @@ export const getAllTransactions = async (): Promise<Transaction[]> => {
     return response.data;
   } catch (error) {
     console.error('Error fetching transactions:', error);
-    throw error; // Você pode optar por tratar o erro aqui ou relançá-lo para ser tratado onde a função é chamada
+    throw error;
   }
 };
 
