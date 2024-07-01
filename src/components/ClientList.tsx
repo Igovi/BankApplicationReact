@@ -1,8 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Form, Button, Spinner } from 'react-bootstrap';
-import { createClient, deleteClient, editClient, getAllClients } from '../services/clientService';
-import { Client } from '../interfaces/Client';
+import { Table, Form, Button, Spinner, Alert } from 'react-bootstrap';
+import { getAllClients, createClient, editClient, deleteClient } from '../services/clientService';
+import { z, ZodError } from 'zod';
 
+interface Client {
+  id: number;
+  name: string;
+  email: string;
+  age: number;
+  account_number: number;
+}
+
+// Definindo esquema de validação com Zod
+const clientSchema = z.object({
+  name: z.string().min(2, { message: 'Name must be at least 2 characters long' }),
+  email: z.string().email({ message: 'Invalid email address' }),
+  age: z.number().min(1, { message: 'Age must be at least 1' }),
+  account_number: z.number().min(1, { message: 'Account number must be at least 1' }),
+});
 
 const ClientList: React.FC = () => {
   const [clientList, setClientList] = useState<Client[]>([]);
@@ -15,6 +30,7 @@ const ClientList: React.FC = () => {
   });
   const [isEditMode, setIsEditMode] = useState(false);
   const [removingClientId, setRemovingClientId] = useState<number | null>(null);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   useEffect(() => {
     fetchClients();
@@ -31,15 +47,27 @@ const ClientList: React.FC = () => {
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const { id, name, email, age, account_number } = formData;
-    const data: Client = { id, name, email, age, account_number };
-
-    if (isEditMode) {
-      await handleEditClient(data);
-    } else {
-      await handleCreateClient(data);
+    
+    // Validar dados do formulário
+    try {
+      const validatedData = clientSchema.parse(formData);
+      
+      const { id, ...data } = validatedData as Client;
+  
+      if (isEditMode) {
+        await handleEditClient(id, data as Client);
+      } else {
+        await handleCreateClient(data as Client);
+      }
+      clearForm();
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const errors = error.errors.map(err => err.message);
+        setValidationErrors(errors);
+      } else {
+        console.error('Validation error:', error);
+      }
     }
-    clearForm();
   };
 
   const handleCreateClient = async (data: Client) => {
@@ -51,11 +79,11 @@ const ClientList: React.FC = () => {
     }
   };
 
-  const handleEditClient = async (data: Client) => {
+  const handleEditClient = async (id: number, data: Client) => {
     try {
-      const updatedClient = await editClient(data.id, data);
+      const updatedClient = await editClient(id, data);
       setClientList((prev) =>
-        prev.map((client) => (client.id === data.id ? updatedClient : client))
+        prev.map((client) => (client.id === id ? updatedClient : client))
       );
     } catch (error) {
       console.error('Error editing client:', error);
@@ -88,6 +116,7 @@ const ClientList: React.FC = () => {
       account_number: 0,
     });
     setIsEditMode(false);
+    setValidationErrors([]);
   };
 
   return (
@@ -132,6 +161,18 @@ const ClientList: React.FC = () => {
 
       <Form onSubmit={onSubmit} className="bg-light p-4 rounded">
         <h3 className="mb-4">{isEditMode ? 'Edit client' : 'Add client'}</h3>
+
+        {/* Exibir erros de validação */}
+        {validationErrors.length > 0 && (
+          <Alert variant="danger">
+            <ul>
+              {validationErrors.map((error, index) => (
+                <li key={index}>{error}</li>
+              ))}
+            </ul>
+          </Alert>
+        )}
+
         <Form.Group className="mb-3">
           <Form.Label>Name</Form.Label>
           <Form.Control type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Enter client name" />
@@ -152,7 +193,7 @@ const ClientList: React.FC = () => {
           <Button variant="dark" className="me-2" onClick={clearForm}>
             Clear
           </Button>
-          <Button variant="success" type="submit" className="ml-2">
+          <Button variant="success" type="submit" className="ml-2" disabled={formData.name.length === 0 || formData.email.length === 0 || formData.age === 0 || formData.account_number === 0}>
             {isEditMode ? 'Update' : 'Submit'}
           </Button>
         </div>
