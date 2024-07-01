@@ -5,6 +5,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { RouterProvider } from "react-router-dom";
 import router from "./routes/router";
+import 'bootstrap/dist/css/bootstrap.min.css'; // Importa o CSS do Bootstrap
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
