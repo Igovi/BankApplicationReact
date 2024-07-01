@@ -1,23 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Form, Button } from 'react-bootstrap';
 import axios from 'axios';
-
-interface Transaction {
-  id: number;
-  clientId: number;
-  type: string;
-  amount: number;
-  transactionDate: string;
-}
+import { Transaction } from '../interfaces/Transaction';
 
 const ExtractList: React.FC = () => {
   const [transactionList, setTransactionList] = useState<Transaction[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [formData, setFormData] = useState({ id: 0 });
   const [showTransactions, setShowTransactions] = useState(false);
+  
 
   useEffect(() => {
-    // Carregar os dados iniciais, se necessário
+    
   }, []);
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
