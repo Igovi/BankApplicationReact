@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Form, Button, Spinner } from 'react-bootstrap';
-import axios from 'axios';
-
-interface Transaction {
-  id: number;
-  clientId: number;
-  type: string;
-  amount: number;
-  transactionDate: string;
-}
+import { Table, Form, Button, Spinner, Alert } from 'react-bootstrap';
+import { Transaction } from '../interfaces/Transaction';
+import { getAllTransactions, createTransaction, deleteTransaction } from '../services/transactionService';
+import { z } from 'zod';
 
 const TransactionList: React.FC = () => {
   const [transactionList, setTransactionList] = useState<Transaction[]>([]);
@@ -18,15 +12,16 @@ const TransactionList: React.FC = () => {
     amount: 0,
   });
   const [removingTransactionId, setRemovingTransactionId] = useState<number | null>(null);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   useEffect(() => {
-    getAllTransactions();
+    fetchAllTransactions();
   }, []);
 
-  const getAllTransactions = async () => {
+  const fetchAllTransactions = async () => {
     try {
-      const response = await axios.get<Transaction[]>('/transactions');
-      setTransactionList(response.data);
+      const transactions = await getAllTransactions();
+      setTransactionList(transactions);
     } catch (error) {
       console.error(error);
       alert('Error fetching transactions');
@@ -39,12 +34,13 @@ const TransactionList: React.FC = () => {
       type: 'debit',
       amount: 0,
     });
+    setValidationErrors([]);
   };
 
-  const deleteTransaction = async (id: number) => {
+  const handleDeleteTransaction = async (id: number) => {
     setRemovingTransactionId(id); // Marca a transação como sendo removida
     try {
-      await axios.delete(`/transactions/${id}`);
+      await deleteTransaction(id);
       setTransactionList((prev) => prev.filter((transaction) => transaction.id !== id));
       alert('Transaction deleted successfully');
     } catch (error) {
@@ -55,9 +51,9 @@ const TransactionList: React.FC = () => {
     }
   };
 
-  const submit = async () => {
+  const handleSubmit = async () => {
     const currentDate = new Date().toISOString();
-    const body = {
+    const transaction = {
       clientId: formData.clientId,
       type: formData.type.toLowerCase(),
       amount: formData.amount,
@@ -65,13 +61,26 @@ const TransactionList: React.FC = () => {
     };
 
     try {
-      const response = await axios.post<Transaction>('/transactions', body);
-      setTransactionList((prev) => [...prev, response.data]);
+      const transactionSchema = z.object({
+        clientId: z.number().min(1, { message: 'Client Id must be greater than or equal to 1 ' }),
+        type: z.enum(['debit', 'credit']),
+        amount: z.number().min(0.01, { message: 'Amount must be greater than 0,01' }),
+      });
+
+      transactionSchema.parse(transaction); // Validação utilizando Zod
+
+      const createdTransaction = await createTransaction(transaction as Transaction);
+      setTransactionList((prev) => [...prev, createdTransaction]);
       clearForm();
       alert('Transaction created successfully');
     } catch (error) {
-      console.error(error);
-      alert('Error creating transaction');
+      if (error instanceof z.ZodError) {
+        const errors = error.errors.map(err => err.message);
+        setValidationErrors(errors);
+      } else {
+        console.error(error);
+        alert('Error creating transaction');
+      }
     }
   };
 
@@ -104,7 +113,7 @@ const TransactionList: React.FC = () => {
                     variant="danger"
                     size="sm"
                     className="ml-1"
-                    onClick={() => deleteTransaction(transaction.id)}
+                    onClick={() => handleDeleteTransaction(transaction.id)}
                     disabled={removingTransactionId !== null}
                   >
                     Delete
@@ -119,6 +128,18 @@ const TransactionList: React.FC = () => {
       <div className="mt-5 col-lg-4">
         <Form className="bg-light p-4 rounded">
           <h3 className="mb-4">Add transaction</h3>
+
+          {/* Exibir erros de validação */}
+          {validationErrors.length > 0 && (
+            <Alert variant="danger">
+              <ul>
+                {validationErrors.map((error, index) => (
+                  <li key={index}>{error}</li>
+                ))}
+              </ul>
+            </Alert>
+          )}
+
           <Form.Group className="mb-3">
             <Form.Label>Client Id</Form.Label>
             <Form.Control
@@ -154,7 +175,12 @@ const TransactionList: React.FC = () => {
             <Button variant="dark" className="me-2" onClick={clearForm}>
               Clear
             </Button>
-            <Button variant="success" type="button" onClick={submit} disabled={formData.clientId === 0 || formData.amount === 0}>
+            <Button
+              variant="success"
+              type="button"
+              onClick={handleSubmit}
+              disabled={formData.clientId === 0 || formData.amount === 0}
+            >
               Submit
             </Button>
           </div>
