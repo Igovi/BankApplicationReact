@@ -2,14 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Form, Button, Spinner, Alert } from 'react-bootstrap';
 import { getAllClients, createClient, editClient, deleteClient } from '../services/clientService';
 import { z, ZodError } from 'zod';
-
-interface Client {
-  id: number;
-  name: string;
-  email: string;
-  age: number;
-  account_number: number;
-}
+import { Client } from '../interfaces/Client';
 
 // Definindo esquema de validação com Zod
 const clientSchema = z.object({
