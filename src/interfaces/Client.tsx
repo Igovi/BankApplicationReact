@@ -3,5 +3,5 @@ export interface Client {
   name: string;
   email: string;
   age: number;
-  account_number: number;
+  account_number: string;
 }

@@ -3,8 +3,8 @@ import { Client } from '../interfaces/Client';
 
 const API_URL = 'http://localhost:8080/clients';
 
-export const getAllClients = async () => {
-  const response = await axios.get<Client[]>(API_URL);
+export const getAllClients = async (page = 0, size = 10, sortField = 'id', sortOrder = 'asc') => {
+  const response = await axios.get(`${API_URL}?page=${page}&size=${size}&sortField=${sortField}&sortOrder=${sortOrder}`);
   return response.data;
 };
 
