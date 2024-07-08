@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import './Header.css';
-import logo from '../assets/images/headerLogo.png';
 const Header = () => {
   const [selectedTab, setSelectedTab] = useState('/clients');
   const location = useLocation();

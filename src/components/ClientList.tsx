@@ -26,15 +26,15 @@ const ClientList: React.FC = () => {
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [sortField, setSortField] = useState('id');
-  const [sortOrder, setSortOrder] = useState('asc');
+  const [sortField, setSortField] = useState<'id' | 'name' | 'email' | 'age'>('id');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchClients(currentPage,sortField,sortOrder);
-  }, [currentPage,sortField,sortOrder]);
+    fetchClients(currentPage, sortField, sortOrder);
+  }, [currentPage, sortField, sortOrder]);
 
-  const fetchClients = async (page: number,sortField?:string,sortOrder?:string) => {
+  const fetchClients = async (page: number, sortField: string, sortOrder: string) => {
     try {
       const response = await getAllClients(page, 5, sortField, sortOrder);
       setClientList(response.content);
@@ -55,10 +55,10 @@ const ClientList: React.FC = () => {
         await handleCreateClient(validatedData as Client);
       }
       clearForm();
-      fetchClients(currentPage);
+      fetchClients(currentPage, sortField, sortOrder);
     } catch (error) {
       if (error instanceof ZodError) {
-        const errors = error.errors.map(err => err.message);
+        const errors = error.errors.map((err) => err.message);
         setValidationErrors(errors);
       } else {
         console.error('Validation error:', error);
@@ -69,7 +69,7 @@ const ClientList: React.FC = () => {
   const handleCreateClient = async (data: Client) => {
     try {
       await createClient(data);
-      fetchClients(currentPage);
+      fetchClients(currentPage, sortField, sortOrder);
     } catch (error) {
       console.error('Error creating client:', error);
     }
@@ -78,7 +78,7 @@ const ClientList: React.FC = () => {
   const handleEditClient = async (id: number, data: Client) => {
     try {
       await editClient(id, data);
-      fetchClients(currentPage);
+      fetchClients(currentPage, sortField, sortOrder);
     } catch (error) {
       console.error('Error editing client:', error);
     }
@@ -88,7 +88,7 @@ const ClientList: React.FC = () => {
     setRemovingClientId(id);
     try {
       await deleteClient(id);
-      fetchClients(currentPage);
+      fetchClients(currentPage, sortField, sortOrder);
     } catch (error) {
       console.error('Error deleting client:', error);
     } finally {
@@ -121,42 +121,41 @@ const ClientList: React.FC = () => {
     setCurrentPage(page);
   };
 
-  const handleSortChange = (field: string) => {
+  const handleSortChange = (field: 'id' | 'name' | 'email' | 'age') => {
+    const order = sortField === field && sortOrder === 'asc' ? 'desc' : 'asc';
     setSortField(field);
-    fetchClients(currentPage,field);
+    setSortOrder(order);
   };
-  
-  
 
   return (
     <div className="client-list__container">
-      <Form className="mb-3">
-        <Form.Group controlId="sortField">
-          <Form.Label>Sort By:</Form.Label>
-          <Form.Control as="select" value={sortField} onChange={(e) => handleSortChange(e.target.value)}>
-            <option value="id">Id</option>
-            <option value="name">Name</option>
-            <option value="email">Email</option>
-            <option value="age">Age</option>
-          </Form.Control>
-        </Form.Group>
-        <Form.Group controlId="sortOrder">
-        <Form.Label>Sort Order:</Form.Label>
-        <Form.Control as="select" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
-          <option value="asc">Ascending</option>
-          <option value="desc">Descending</option>
-        </Form.Control>
-      </Form.Group>
-      </Form>
-      
-
       <Table striped bordered hover className="client-list__content">
         <thead className="thead-dark">
           <tr>
-            <th>Id</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Age</th>
+            <th>
+              Id{' '}
+              <Button variant="" onClick={() => handleSortChange('id')}>
+                {sortField === 'id' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+              </Button>
+            </th>
+            <th>
+              Name{' '}
+              <Button variant="" onClick={() => handleSortChange('name')}>
+                {sortField === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+              </Button>
+            </th>
+            <th>
+              Email{' '}
+              <Button variant="" onClick={() => handleSortChange('email')}>
+                {sortField === 'email' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+              </Button>
+            </th>
+            <th>
+              Age{' '}
+              <Button variant="" onClick={() => handleSortChange('age')}>
+                {sortField === 'age' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+              </Button>
+            </th>
             <th>Account Number</th>
             <th>Actions</th>
           </tr>
