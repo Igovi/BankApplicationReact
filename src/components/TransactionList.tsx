@@ -111,7 +111,7 @@ const TransactionList: React.FC = () => {
               <td>{transaction.clientId}</td>
               <td>{transaction.type}</td>
               <td>R$ {transaction.amount.toFixed(2)}</td>
-              <td>{transaction.transactionDate}</td>
+              <td>{new Date(transaction.transactionDate).toLocaleDateString()}</td>
               <td>
                 {removingTransactionId === transaction.id ? (
                   <Spinner animation="border" variant="danger" size="sm" />
