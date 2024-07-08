@@ -3,9 +3,9 @@ import { Transaction } from '../interfaces/Transaction';
 
 const API_URL = 'http://localhost:8080/transactions';
 
-export const getAllTransactions = async (): Promise<Transaction[]> => {
+export const getAllTransactions = async (page = 0 , size = 5) => {
   try {
-    const response = await axios.get<Transaction[]>(API_URL);
+    const response = await axios.get(`${API_URL}?page=${page}&size=${size}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching transactions:', error);

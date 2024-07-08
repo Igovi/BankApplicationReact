@@ -16,7 +16,6 @@ const LoginPage: FC<LoginPageProps> = ({ setToken }) => {
 
   const navigate = useNavigate();
 
-  // Zod schema for validation
   const schema = z.object({
     username: z.string().nonempty('Username is required'),
     password: z.string().min(3, 'Password must be at least 3 characters long'),
@@ -34,7 +33,6 @@ const LoginPage: FC<LoginPageProps> = ({ setToken }) => {
     setError('');
 
     try {
-      // Validate with Zod
       schema.parse({ username, password });
 
       const response = await axios.post('http://localhost:8080/autenticacao/login', {
@@ -59,7 +57,6 @@ const LoginPage: FC<LoginPageProps> = ({ setToken }) => {
     }
   };
 
-  // Handle form validity based on Zod schema
   useEffect(() => {
     try {
       schema.parse({ username, password });

@@ -201,7 +201,6 @@ const ClientList: React.FC = () => {
       <Form onSubmit={onSubmit} className="bg-light p-4 rounded">
         <h3 className="mb-4">{isEditMode ? 'Edit client' : 'Add client'}</h3>
 
-        {/* Exibir erros de validação */}
         {validationErrors.length > 0 && (
           <Alert variant="danger">
             <ul>

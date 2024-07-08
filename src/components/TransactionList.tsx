@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Form, Button, Spinner, Alert } from 'react-bootstrap';
+import { Table, Form, Button, Spinner, Alert, Pagination } from 'react-bootstrap';
 import { Transaction } from '../interfaces/Transaction';
 import { getAllTransactions, createTransaction, deleteTransaction } from '../services/transactionService';
 import { z } from 'zod';
@@ -13,15 +13,18 @@ const TransactionList: React.FC = () => {
   });
   const [removingTransactionId, setRemovingTransactionId] = useState<number | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
-    fetchAllTransactions();
-  }, []);
+    fetchTransactions(currentPage);
+  }, [currentPage]);
 
-  const fetchAllTransactions = async () => {
+  const fetchTransactions = async (page: number) => {
     try {
-      const transactions = await getAllTransactions();
-      setTransactionList(transactions);
+      const { content, totalPages } = await getAllTransactions(page,5);
+      setTransactionList(content);
+      setTotalPages(totalPages);
     } catch (error) {
       console.error(error);
       alert('Error fetching transactions');
@@ -41,7 +44,7 @@ const TransactionList: React.FC = () => {
     setRemovingTransactionId(id); 
     try {
       await deleteTransaction(id);
-      setTransactionList((prev) => prev.filter((transaction) => transaction.id !== id));
+      fetchTransactions(currentPage);
       alert('Transaction deleted successfully');
     } catch (error) {
       console.error(error);
@@ -70,7 +73,7 @@ const TransactionList: React.FC = () => {
       transactionSchema.parse(transaction); 
 
       const createdTransaction = await createTransaction(transaction as Transaction);
-      setTransactionList((prev) => [...prev, createdTransaction]);
+      fetchTransactions(currentPage)     
       clearForm();
       alert('Transaction created successfully');
     } catch (error) {
@@ -82,6 +85,10 @@ const TransactionList: React.FC = () => {
         alert('Error creating transaction');
       }
     }
+  };
+
+  const handlePageChange = (pageIndex: number) => {
+    setCurrentPage(pageIndex);
   };
 
   return (
@@ -125,11 +132,18 @@ const TransactionList: React.FC = () => {
         </tbody>
       </Table>
 
+      <Pagination>
+        {[...Array(totalPages)].map((_, pageIndex) => (
+          <Pagination.Item key={pageIndex} active={pageIndex === currentPage} onClick={() => handlePageChange(pageIndex)}>
+            {pageIndex + 1}
+          </Pagination.Item>
+        ))}
+      </Pagination>
+
       <div className="mt-5 col-lg-4">
         <Form className="bg-light p-4 rounded">
           <h3 className="mb-4">Add transaction</h3>
 
-          {/* Exibir erros de validação */}
           {validationErrors.length > 0 && (
             <Alert variant="danger">
               <ul>

@@ -8,7 +8,7 @@ import TransactionsPage from "../pages/TransactionsPage/TransactionsPage";
 import PrivateRoutes from './PrivateRoutes';
 
 interface LoginPageProps {
-    setToken: (token: string) => void; // Função para armazenar o token
+    setToken: (token: string) => void; 
   }
 
 const router = createBrowserRouter([
