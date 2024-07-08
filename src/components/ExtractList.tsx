@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Form, Button , Alert} from 'react-bootstrap';
-import axios from 'axios';
 import { Transaction } from '../interfaces/Transaction';
 import { useParams } from 'react-router-dom';
+import { fetchTransactions } from '../services/extractService';
 
 const ExtractList: React.FC = () => {
   const { clientId } = useParams<{ clientId?: string }>(); 
@@ -13,17 +13,17 @@ const ExtractList: React.FC = () => {
   const [noTransactionsFound, setNoTransactionsFound] = useState(false);
 
   useEffect(() => {
-    if (clientId && !showTransactions) {
-      fetchTransactions(clientId);
+    if (clientId && !showTransactions && formData.id !== 0) {
+      fetchExtract(clientId);
     }
-  }, [clientId, showTransactions]);
+  }, [clientId, showTransactions, formData.id]);
 
-  const fetchTransactions = async (id: string) => {
+  const fetchExtract = async (id: string) => {
     setNoTransactionsFound(false)
     try {
-      const response = await axios.get(`/extract/client/${id}`);
-      setTransactionList(response.data.transactions);
-      setTotal(response.data.total);
+      const response = await fetchTransactions(id);
+      setTransactionList(response.transactions);
+      setTotal(response.total);
       setShowTransactions(true);
     } catch (error) {
       setNoTransactionsFound(true)
@@ -34,9 +34,9 @@ const ExtractList: React.FC = () => {
     event.preventDefault();
     setNoTransactionsFound(false)
     try {
-      const response = await axios.get(`/extract/client/${formData.id}`);
-      setTransactionList(response.data.transactions);
-      setTotal(response.data.total);
+      const response = await fetchTransactions(formData.id);
+      setTransactionList(response.transactions);
+      setTotal(response.total);
       setShowTransactions(true);
     } catch (error) {
       setNoTransactionsFound(true)
