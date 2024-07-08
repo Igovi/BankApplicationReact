@@ -92,13 +92,13 @@ const ExtractList: React.FC = () => {
                   <td>{transaction.id}</td>
                   <td>{transaction.clientId}</td>
                   <td>{transaction.type}</td>
-                  <td>{transaction.amount}</td>
+                  <td>R$ {transaction.amount.toFixed(2)}</td>
                   <td>{transaction.transactionDate}</td>
                 </tr>
               ))}
             </tbody>
           </Table>
-          <p>Total: {total}</p>
+          <p>Total: R$ {total.toFixed(2)}</p>
         </div>
       )}
     </div>
