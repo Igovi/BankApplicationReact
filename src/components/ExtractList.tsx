@@ -26,6 +26,7 @@ const ExtractList: React.FC = () => {
       setTotal(response.total);
       setShowTransactions(true);
     } catch (error) {
+      setShowTransactions(false);
       setNoTransactionsFound(true)
     }
   };
@@ -39,6 +40,7 @@ const ExtractList: React.FC = () => {
       setTotal(response.total);
       setShowTransactions(true);
     } catch (error) {
+      setShowTransactions(false);
       setNoTransactionsFound(true)
     }
   };
